@@ -3,6 +3,7 @@ TERMUX_PKG_DESCRIPTION="Swift is a high-performance system programming language"
 TERMUX_PKG_LICENSE="Apache-2.0, NCSA"
 TERMUX_PKG_MAINTAINER="@finagolfin"
 TERMUX_PKG_VERSION=5.10.1
+TERMUX_PKG_REVISION=1
 SWIFT_RELEASE="RELEASE"
 TERMUX_PKG_SRCURL=https://github.com/apple/swift/archive/swift-$TERMUX_PKG_VERSION-$SWIFT_RELEASE.tar.gz
 TERMUX_PKG_SHA256=087c59a1b79c46dd23f8e6cb4fe12a27935a5b6581282f48db952827bb3fdf57
@@ -20,7 +21,7 @@ TERMUX_PKG_FORCE_CMAKE=true
 TERMUX_CMAKE_BUILD=Ninja
 
 SWIFT_COMPONENTS="autolink-driver;compiler;clang-resource-dir-symlink;swift-remote-mirror;license;sourcekit-inproc;static-mirror-lib;stdlib;sdk-overlay"
-SWIFT_TOOLCHAIN_FLAGS="-RA --llvm-targets-to-build='X86;ARM;AArch64' -j $TERMUX_MAKE_PROCESSES --install-prefix=$TERMUX_PREFIX"
+SWIFT_TOOLCHAIN_FLAGS="-RA --llvm-targets-to-build='X86;ARM;AArch64' -j $TERMUX_PKG_MAKE_PROCESSES --install-prefix=$TERMUX_PREFIX"
 SWIFT_PATH_FLAGS="--build-subdir=. --install-destdir=/"
 SWIFT_BUILD_FLAGS="$SWIFT_TOOLCHAIN_FLAGS $SWIFT_PATH_FLAGS"
 
@@ -108,15 +109,15 @@ termux_step_host_build() {
 		local CLANGXX=$(command -v clang++)
 
 		# The Ubuntu CI may not have clang/clang++ in its path so explicitly set it
-		# to clang-15 instead.
+		# to clang-17 instead.
 		if [ -z "$CLANG" ]; then
-			CLANG=$(command -v clang-15)
-			CLANGXX=$(command -v clang++-15)
+			CLANG=$(command -v clang-17)
+			CLANGXX=$(command -v clang++-17)
 		fi
 
 		# Natively compile llvm-tblgen and some other files needed later.
 		SWIFT_BUILD_ROOT=$TERMUX_PKG_HOSTBUILD_DIR $TERMUX_PKG_SRCDIR/swift/utils/build-script \
-		-R --no-assertions -j $TERMUX_MAKE_PROCESSES $SWIFT_PATH_FLAGS \
+		-R --no-assertions -j $TERMUX_PKG_MAKE_PROCESSES $SWIFT_PATH_FLAGS \
 		--skip-build-cmark --skip-build-llvm --skip-build-swift --skip-early-swift-driver \
 		--skip-early-swiftsyntax --build-toolchain-only --host-cc=$CLANG --host-cxx=$CLANGXX
 	fi
