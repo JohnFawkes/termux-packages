@@ -2,9 +2,9 @@ TERMUX_PKG_HOMEPAGE=https://www.chromium.org/Home
 TERMUX_PKG_DESCRIPTION="Chromium web browser"
 TERMUX_PKG_LICENSE="BSD 3-Clause"
 TERMUX_PKG_MAINTAINER="@licy183"
-TERMUX_PKG_VERSION=136.0.7103.113
+TERMUX_PKG_VERSION=137.0.7151.68
 TERMUX_PKG_SRCURL=https://commondatastorage.googleapis.com/chromium-browser-official/chromium-$TERMUX_PKG_VERSION.tar.xz
-TERMUX_PKG_SHA256=7c765bd13df842a28bb52279b8d711411ac6082151473e07bd70b9a482c0a0ac
+TERMUX_PKG_SHA256=d9cabbfb902f8ac727cea424a1fa41c0d95efe40bbf385b50f76f8856aa63cd3
 TERMUX_PKG_DEPENDS="atk, cups, dbus, fontconfig, gtk3, krb5, libc++, libdrm, libevdev, libxkbcommon, libminizip, libnss, libx11, mesa, openssl, pango, pulseaudio, zlib"
 TERMUX_PKG_BUILD_DEPENDS="chromium-host-tools, libffi-static"
 # TODO: Split chromium-common and chromium-headless
@@ -12,6 +12,7 @@ TERMUX_PKG_BUILD_DEPENDS="chromium-host-tools, libffi-static"
 # TERMUX_PKG_SUGGESTS="chromium-headless, chromium-driver"
 # Chromium doesn't support i686 on Linux.
 TERMUX_PKG_EXCLUDED_ARCHES="i686"
+TERMUX_PKG_ON_DEVICE_BUILD_NOT_SUPPORTED=true
 
 SYSTEM_LIBRARIES="    fontconfig"
 # TERMUX_PKG_DEPENDS="fontconfig"
@@ -40,12 +41,6 @@ termux_step_post_get_source() {
 }
 
 termux_step_pre_configure() {
-	# Certain packages are not safe to build on device because their
-	# build.sh script deletes specific files in $TERMUX_PREFIX.
-	if $TERMUX_ON_DEVICE_BUILD; then
-		termux_error_exit "Package '$TERMUX_PKG_NAME' is not safe for on-device builds."
-	fi
-
 	# Use prebuilt swiftshader
 	mv $TERMUX_PKG_SRCDIR/third_party/swiftshader $TERMUX_PKG_SRCDIR/third_party/swiftshader.unused
 	mkdir -p $TERMUX_PKG_SRCDIR/third_party/swiftshader/
@@ -191,7 +186,7 @@ treat_warnings_as_errors = false
 # Use system libraries as little as possible
 use_system_freetype = false
 # use_system_libdrm = true
-use_system_libffi = false
+# use_system_libffi = false
 use_custom_libcxx = false
 use_custom_libcxx_for_host = true
 use_allocator_shim = false
@@ -231,6 +226,9 @@ enable_nacl = false
 is_cfi = false
 use_cfi_icall = false
 use_thin_lto = false
+# OpenCL doesn't work out of box in Termux, use NNAPI instead
+build_tflite_with_opencl = false
+build_tflite_with_nnapi = true
 # Enable rust
 custom_target_rust_abi_target = \"$CARGO_TARGET_NAME\"
 llvm_android_mainline = true
